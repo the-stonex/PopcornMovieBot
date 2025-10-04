@@ -1,0 +1,46 @@
+{
+  "name": "Popcorn Telegram Bot",
+  "description": "🍿 Telegram Movie Bot with Force Join, Helper Bot & TMDb Search (Heroku Ready).",
+  "repository": "https://github.com/yourusername/popcorn-bot",
+  "logo": "https://i.imgur.com/WK9s1H3.png",
+  "keywords": ["telegram", "bot", "movies", "heroku"],
+  "env": {
+    "BOT_TOKEN": {
+      "description": "Your Telegram Bot Token from @BotFather",
+      "required": true
+    },
+    "PUBLIC_CHANNEL": {
+      "description": "Public Channel username (e.g. @popcornmovies)",
+      "required": true
+    },
+    "PRIVATE_CHANNEL": {
+      "description": "Private Channel ID (e.g. -1001234567890)",
+      "required": true
+    },
+    "PRIVATE_INVITE": {
+      "description": "Private Channel Invite Link",
+      "required": true
+    },
+    "SECOND_BOT_USERNAME": {
+      "description": "Helper Bot Username (without @)",
+      "required": true
+    },
+    "LOG_GROUP_ID": {
+      "description": "Group ID where logs will be sent (e.g. -1009876543210)",
+      "required": true
+    },
+    "BOT_USERNAME": {
+      "description": "Main Bot Username (e.g. PopcornMovieBot)",
+      "required": true
+    },
+    "TMDB_API_KEY": {
+      "description": "TheMovieDB API key (https://www.themoviedb.org)",
+      "required": false
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}
