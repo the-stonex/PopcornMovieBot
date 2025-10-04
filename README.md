@@ -6,7 +6,7 @@ A full-featured Telegram movie bot built with `python-telegram-bot`.
 
 Click the button below to deploy this bot directly to Heroku 👇
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/the-stonex/PopcornMovieBot)
 
 ---
 
@@ -36,8 +36,8 @@ Click the button below to deploy this bot directly to Heroku 👇
 ## ⚙️ Manual Deploy (CLI)
 
 ```bash
-git clone https://github.com/yourusername/popcorn-bot
-cd popcorn-bot
+git clone https://github.com/the-stonex/PopcornMovieBot
+cd PopcornMovieBot
 heroku create
 git push heroku master
 heroku ps:scale worker=1
