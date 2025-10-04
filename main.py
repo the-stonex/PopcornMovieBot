@@ -47,7 +47,6 @@ async def is_user_joined(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         logger.warning(f"Membership check error: {e}")
         return False
 
-
 # ---------- Force Join Screen ----------
 async def send_force_join(update: Update, context: ContextTypes.DEFAULT_TYPE, edit=False):
     keyboard = [
@@ -65,11 +64,16 @@ async def send_force_join(update: Update, context: ContextTypes.DEFAULT_TYPE, ed
         "3️⃣ Helper Bot को Start करें\n\n"
         "फिर '✅ I Completed All' पर क्लिक करें ✅"
     )
+
     if edit and update.callback_query:
-        await update.callback_query.edit_message_text(text, parse_mode="Markdown", reply_markup=markup)
+        msg = update.callback_query.message
+        # ✅ Sirf tab edit karein jab text ya markup alag ho
+        if msg.text != text or (msg.reply_markup and msg.reply_markup.to_dict() != markup.to_dict()):
+            await update.callback_query.edit_message_text(text, parse_mode="Markdown", reply_markup=markup)
+        else:
+            await update.callback_query.answer()
     else:
         await update.message.reply_text(text, parse_mode="Markdown", reply_markup=markup)
-
 
 # ---------- Log New User ----------
 async def log_new_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -85,7 +89,6 @@ async def log_new_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(LOG_GROUP_ID, text, parse_mode="Markdown")
         except Exception as e:
             logger.warning(f"Log error: {e}")
-
 
 # ---------- Welcome Screen ----------
 async def send_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE, query=False):
@@ -103,11 +106,15 @@ async def send_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE, query
         [InlineKeyboardButton("📢 Share Bot", url=f"https://t.me/share/url?url=https://t.me/{BOT_USERNAME}")],
     ]
     markup = InlineKeyboardMarkup(keyboard)
+
     if query and update.callback_query:
-        await update.callback_query.edit_message_text(text, parse_mode="Markdown", reply_markup=markup)
+        msg = update.callback_query.message
+        if msg.text != text or (msg.reply_markup and msg.reply_markup.to_dict() != markup.to_dict()):
+            await update.callback_query.edit_message_text(text, parse_mode="Markdown", reply_markup=markup)
+        else:
+            await update.callback_query.answer()
     else:
         await update.message.reply_text(text, parse_mode="Markdown", reply_markup=markup)
-
 
 # ---------- /start Command ----------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -117,16 +124,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     await send_welcome(update, context)
 
-
 # ---------- Recheck ----------
 async def recheck_all(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    if await is_user_joined(update, context):
+    try:
+        joined = await is_user_joined(update, context)
+    except Exception as e:
+        logger.warning(f"Membership check failed: {e}")
+        joined = False
+
+    if joined:
         await send_welcome(update, context, query=True)
     else:
         await send_force_join(update, context, edit=True)
-
 
 # ---------- TMDb API Helpers ----------
 def tmdb_search(query):
@@ -137,7 +148,6 @@ def tmdb_search(query):
     r = requests.get(url, params=params)
     return r.json() if r.status_code == 200 else None
 
-
 def tmdb_trending():
     if not TMDB_API_KEY:
         return None
@@ -145,14 +155,12 @@ def tmdb_trending():
     r = requests.get(url)
     return r.json() if r.status_code == 200 else None
 
-
 def tmdb_now_playing():
     if not TMDB_API_KEY:
         return None
     url = f"https://api.themoviedb.org/3/movie/now_playing?api_key={TMDB_API_KEY}&language=en-US"
     r = requests.get(url)
     return r.json() if r.status_code == 200 else None
-
 
 # ---------- Callback Handler ----------
 async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -183,7 +191,6 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             date = m.get("release_date") or "N/A"
             msg += f"{i}. *{title}* ({date})\n"
         await query.edit_message_text(msg, parse_mode="Markdown")
-
 
 # ---------- Message Handler ----------
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -216,7 +223,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text(caption, parse_mode="Markdown")
 
-
 # ---------- Main ----------
 def main():
     if not BOT_TOKEN:
@@ -231,7 +237,6 @@ def main():
 
     logger.info("🚀 Popcorn Bot started successfully!")
     app.run_polling()
-
 
 if __name__ == "__main__":
     main()
